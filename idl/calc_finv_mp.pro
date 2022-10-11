@@ -23,8 +23,8 @@ PRO calc_finv_mp, num_func, func_indx, ret_nlev, htop, hbot, air_pres, $
 ; Name			 Description
 ; --------     ---------------------
 ; f_matrix     [L,j], where L=retrieval levels, j=trapezoid levels, j<L
-; 					It is the transformation matrix where each retrieval state function is on the standard 
-;					   retrieval pressure grid
+;              It is the transformation matrix where each retrieval state function is on the standard 
+;              retrieval pressure grid
 ; f_inv        [j,L] and it is the pseudoinverse matrix of f_matrix
 ;
 ; DEPENDENCIES:
@@ -44,40 +44,40 @@ PRO calc_finv_mp, num_func, func_indx, ret_nlev, htop, hbot, air_pres, $
 ; Step 1: calculate the transformation matrix: f_matrix
 ; ------------------------------------------------
 	
-	ndim = num_func
-	f_matrix = FLTARR(ret_nlev,ndim)
+  ndim = num_func
+  f_matrix = FLTARR(ret_nlev,ndim)
 	
-   FOR ifunc = 0, ndim - 1 DO BEGIN
+  FOR ifunc = 0, ndim - 1 DO BEGIN
 ;  Call slb2fin for one state function at a time setting the corresponding slbval = 1.0
-		slbval = FLTARR(ndim)
-   	slbval(ifunc) = 1.0
-      fine = FLTARR(ret_nlev)
-   	SLB2FIN, num_func, func_indx, slbval, htop, hbot, $
-                   1100., air_pres, fine 
-      f_matrix(*,ifunc) = fine; 
-   ENDFOR  
+     slbval = FLTARR(ndim)
+     slbval(ifunc) = 1.0
+     fine = FLTARR(ret_nlev)
+     SLB2FIN, num_func, func_indx, slbval, htop, hbot, $
+              1100., air_pres, fine
+     f_matrix(*,ifunc) = fine
+  ENDFOR
 
 ; Subset f_matrix to remove trailing zeros
+  
+  s=size(f_matrix)
+  nL=s(1) ; ret_nlev, max=100
+  nj=s(2) ; ak_nlev, max=30
 
-s=size(f_matrix)
-nL=s(1); ret_nlev, max=100
-nj=s(2); ak_nlev, max=30
-
-for i=nL-1,0,-1 do if (n_elements(where(f_matrix(i,*) eq 0.0)) lt nj) then break
-rpos=i
-for i=nj-1,0,-1 do if (n_elements(where(f_matrix(*,i) eq 0.0)) lt nL) then break
-cpos=i
-f_matrix=f_matrix(0:rpos,0:cpos); [nL x nj] 
+  for i=nL-1,0,-1 do if (n_elements(where(f_matrix(i,*) eq 0.0)) lt nj) then break
+  rpos=i
+  for i=nj-1,0,-1 do if (n_elements(where(f_matrix(*,i) eq 0.0)) lt nL) then break
+  cpos=i
+  f_matrix=f_matrix(0:rpos,0:cpos) ; [nL x nj] 
 
 ; ------------------------------------------------
 ; Step 2: calculate the inverse of f_matrix using 
 ;         the Moore-Penrose pseudoinverse method
 ; ------------------------------------------------
 ; This matrix, fftr, should have no zeros on diagonal, otherwise inversion fails
-	fftr = MATRIX_MULTIPLY(DOUBLE(f_matrix),DOUBLE(f_matrix),/ATRANSPOSE); [nj x nj]
-	status=1L
-   finv1 = LA_INVERT(fftr,STATUS=status,/double)
-	print,status; status should be zero to indicate successful inversion
-   f_inv = MATRIX_MULTIPLY(finv1,DOUBLE(f_matrix),/BTRANSPOSE); [nj x nL]
+  fftr = MATRIX_MULTIPLY(DOUBLE(f_matrix),DOUBLE(f_matrix),/ATRANSPOSE) ; [nj x nj]
+  status=1L
+  finv1 = LA_INVERT(fftr,STATUS=status,/double)
+  print,status ; status should be zero to indicate successful inversion
+  f_inv = MATRIX_MULTIPLY(finv1,DOUBLE(f_matrix),/BTRANSPOSE)  ; [nj x nL]
  
 END 
