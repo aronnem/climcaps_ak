@@ -1,7 +1,8 @@
 pro nsplot_climcaps_ak_fmatrix,type,func_matrix,func_inv,ak,ak100
 
 ; testing calc_finv.pro output using ozone
-fn='/peate_sci/nadias/data/L2/jpss/2020/SNDR.J1.CRIMSS.20201230T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.210203073025.nc'
+;fn='/peate_sci/nadias/data/L2/jpss/2020/SNDR.J1.CRIMSS.20201230T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.210203073025.nc'
+fn='../SNDR.J1.CRIMSS.20201230T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.210203073025.nc'
 
 ; Read CLIMCAPS netcdf file for averaging kernels and CO column density profiles
 ncread_climcaps_main,fn,clim
@@ -32,7 +33,7 @@ iscan = 20
 	psurf=surf_pres(ifoot,iscan)
 	ret_pres=clim.air_pres/100.;(0:ret_nlev)/100.
 	ak_pidx=akgrp.o3_func_indxs; 10 indices 
-	ak_nlev=n_elements(ak_pidx)-1
+	ak_nlev=n_elements(ak_pidx)
    ak_plev=akgrp.o3_func_pres/100.
 
 ; -------------------------
@@ -98,7 +99,7 @@ print,ak_pidx_scene
    	thick=1,color=reform(ct(0,*)),yrange=yrange,title='func_inv',ytitle='Pressure [hPa]')
    		a.xtickfont_size=8
         	a.ytickfont_size=8
-        	a.ysubgridstyle=0
+                a.ysubgridstyle=0
          a.ytickvalues=yticks
 ; loop over state functions
 		for i=1,nj-1 do begin
@@ -118,7 +119,7 @@ print,ak_pidx_scene
 	if type eq 2 then begin
 		ak_pres=ret_pres(ak_pidx_scene)
 		print,ak_pres
-      ak=reform(akgrp.o3_ave_kern(0:nj,0:nj,ifoot,iscan)); [nj x nj]
+      ak=reform(akgrp.o3_ave_kern(0:nj-1,0:nj-1,ifoot,iscan)); [nj x nj]
       a=plot(ak(0,*),ak_pres,/ylog,/buffer,font_size=8,$
        dimensions=[400,800],thick=1,color=reform(ct(0,*)),yrange=yrange,title='Coarse Averaging Kernels (AKs)',ytitle='Pressure [hPa]')
          a.xtickfont_size=8
