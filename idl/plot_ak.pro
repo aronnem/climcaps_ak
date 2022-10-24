@@ -42,7 +42,7 @@ pro plot_ak, ak, plev, plot_filename
   colors = colortable([[204,204,0],[0,144,255],[0,0,53]],ncolors=nj)
   ; round to nearest 0.1
   amax = (max(ak*10) + 1)/10.0
-  amin = (min(ak*10) + 1)/10.0
+  amin = (min(ak*10) - 1)/10.0
 
   a = plot(ak[*,0], Plev, $
            /ylog, xrange=[amin,amax], yrange=yrange, title='Averaging Kernel', $
