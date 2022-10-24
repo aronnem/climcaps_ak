@@ -57,18 +57,6 @@ PRO calc_finv_mp, num_func, func_indx, ret_nlev, htop, hbot, air_pres, $
      f_matrix(*,ifunc) = fine
   ENDFOR
 
-; Subset f_matrix to remove trailing zeros
-  
-  s=size(f_matrix)
-  nL=s(1) ; ret_nlev, max=100
-  nj=s(2) ; ak_nlev, max=30
-
-  for i=nL-1,0,-1 do if (n_elements(where(f_matrix(i,*) eq 0.0)) lt nj) then break
-  rpos=i
-  for i=nj-1,0,-1 do if (n_elements(where(f_matrix(*,i) eq 0.0)) lt nL) then break
-  cpos=i
-  f_matrix=f_matrix(0:rpos,0:cpos) ; [nL x nj] 
-
 ; ------------------------------------------------
 ; Step 2: calculate the inverse of f_matrix using 
 ;         the Moore-Penrose pseudoinverse method
