@@ -158,14 +158,14 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
      ret_pres, surf_pres, ak_pidx, htop, hbot, ak, /adjust_surface
 
   ; call helper to compute Func matrix and inverse (F and F+)
-  ak_nlev = n_elements(ak_pidx)
+  num_func = n_elements(ak_pidx) - 1
   ret_nlev = n_elements(ret_pres)
-  calc_finv_mp, ak_nlev, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
+  calc_finv_mp, num_func, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
                 Fmatrix, Finv
 
-  s = size(Fmatrix)
-  nL = s[1]
-  nj = s[2]
+  s = size(Fmatrix, /dimensions)
+  nL = s[0]
+  nj = s[1]
 
   AKcoarse = ak
   Pcoarse = ret_pres[ak_pidx]

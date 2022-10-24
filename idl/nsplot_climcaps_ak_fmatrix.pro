@@ -62,7 +62,8 @@ iscan = 20
 ; Equation 11 of Maddy and Barnet, IEEE TGRS, 2008 (MB08) 
 ; func_matrix is the [ak_nlev x ret_nlev] matrix of trapezoids
 ; func_inv is the inverse of func_matrix [ret_nlev x ak_nlev]
-	calc_finv_mp, ak_nlev_scene, ak_pidx_scene, ret_nlev, htop, hbot, ret_pres,$
+        num_funcs = ak_nlev_scene - 1
+	calc_finv_mp, num_funcs, ak_pidx_scene, ret_nlev, htop, hbot, ret_pres,$
 		func_matrix, func_inv
 print,ak_pidx_scene
 	s=size(func_matrix)
