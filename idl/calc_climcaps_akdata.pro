@@ -105,7 +105,6 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, ak_pidx, htop, hbot, ak, $
   ; -------------------------
   ; STEP 3: compute AK, Smoothing kernels
   ; -------------------------
-  AKcoarse = ak
   Pcoarse = ret_pres[ak_pidx]
 
   AKfine = Fmatrix # AKcoarse # Finv

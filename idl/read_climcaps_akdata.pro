@@ -72,6 +72,8 @@ pro read_raw_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   varid = ncdf_varid(ak_grpid, mol_name + '_ave_kern')
   ncdf_varget, ak_grpid, varid, ak_full
 
+  ak = ak_full[*,*,ifoot,iscan]
+
 end
 
 
