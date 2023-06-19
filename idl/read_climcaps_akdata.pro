@@ -72,39 +72,6 @@ pro read_raw_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   varid = ncdf_varid(ak_grpid, mol_name + '_ave_kern')
   ncdf_varget, ak_grpid, varid, ak_full
 
-  ; -------------------------
-  ; STEP 2: adjust surface
-  ; -------------------------
-
-  ; Call changlev to determine number of pressure levels above surface
-  ; pressure at retrieval scene
-  ; ;  Name          Description
-  ; ------    ----------------------
-  ; surf_pres surface pressure
-  ; ret_pres  Standard RTA pressure grid
-  ; ret_nlev  number of levels (RTA grid)
-  ; ak_nlev   number of coarse layers to be adjusted for topography
-  ; ak_pres   coarse layers to be adjusted for topography 
-  ;
-  ; OUTPUT
-  ; ak_nlev_scene    number of coarse levels at scene psurf
-  ; ak_pidx_scene    coarse level boundaries at scene psurf
-
-  if keyword_set(adjust_surface) then begin
-     ret_nlev = n_elements(ret_pres)
-     ak_nlev = n_elements(ak_pidx)
-     changlev, surf_pres, ret_pres, ret_nlev, ak_nlev, ak_pidx, $
-               ak_nlev_scene, ak_pidx_scene
-     ak_pidx = ak_pidx_scene
-     ; note: AK will be truncated if changlev removed a
-     ; near-surface coarse layer. This happens if the surface is
-     ; above one entire coarse layer.
-     k = ak_nlev_scene-2
-     ak = ak_full[0:k,0:k,ifoot,iscan]
-  endif else begin
-     ak = ak_full[*,*,ifoot,iscan]
-  endelse
-
 end
 
 
@@ -155,24 +122,11 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ; surface correction
   read_raw_climcaps_akdata, $
      ncfile, ifoot, iscan, mol_name, $
-     ret_pres, surf_pres, ak_pidx, htop, hbot, ak, /adjust_surface
+     ret_pres, surf_pres, ak_pidx, htop, hbot, ak
 
-  ; call helper to compute Func matrix and inverse (F and F+)
-  num_func = n_elements(ak_pidx) - 1
-  ret_nlev = n_elements(ret_pres)
-  calc_finv_mp, num_func, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
-                Fmatrix, Finv
+  ; call helper to do all the AK calculations.
+  calc_climcaps_akdata, ret_pres, surf_pres, ak_pidx, htop, hbot, ak, $
+                        Fmatrix, Finv, AKcoarse, Pcoarse, $
+                        AKfine, Pfine, Skernel, /adjust_surface
 
-  s = size(Fmatrix, /dimensions)
-  nL = s[0]
-  nj = s[1]
-
-  AKcoarse = ak
-  Pcoarse = ret_pres[ak_pidx]
-
-  AKfine = Fmatrix # ak # Finv
-  Pfine = ret_pres[0:nL-1]
-
-  Skernel = Fmatrix # Finv
-  
 end
