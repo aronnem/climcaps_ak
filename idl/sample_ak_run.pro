@@ -14,7 +14,7 @@ molnames = ['air_temp', 'h2o_vap', 'o3', 'co', 'co2', 'ch4']
 
 ncfiles = [ $
           '../SNDR.J1.CRIMSS.20190901T0336.m06.g037.L2_CLIMCAPS_RET.std.v02_28.G.200214174949.nc', $
-          '../SNDR.J1.CRIMSS.20201230T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.210203073025.nc' ]
+          '../SNDR.J1.CRIMSS.20190901T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.200214190447.nc' ]
 ifoot = [ 4, 15]
 iscan = [32, 20]
 
