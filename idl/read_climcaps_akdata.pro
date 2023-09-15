@@ -1,8 +1,9 @@
-pro read_raw_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
-                         ret_pres, surf_pres, ak_pidx, htop, hbot, ak, $
+pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
+                         ret_pres, surf_pres, pres_nsurf, ak_pidx, $
+								 htop, hbot, ak, ak_nfunc, ak_peff, $
                          adjust_surface=adjust_surface
   ;-------------------------------------------------
-  ; read_raw_climcaps_akdata:
+  ; read_climcaps_akdata:
   ;
   ; Helper procedure to read the required data from a CLIMCAPS netCDF file
   ; for computing the trapezoid functions, and apply a surface correction
@@ -27,12 +28,18 @@ pro read_raw_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ; ---------   -----------------------------
   ; ret_pres    pressure levels in RT grid (100 elements), units hPa
   ; surf_pres   scalar surface pressure at requested footprint
-  ; ak_pidx     integer index array into pressure levels for the trapezoid
-  ;             functions for the requested profile. For n coarse layers,
+  ; pres_nsurf  Scalar index specifying which element of ret_pres
+  ; 				 is closest to surf_pres
+  ; ak_pidx     integer index array of pressure level boundaries for the
+  ;             trapezoid functions. For n coarse layers,
   ;             there will be n+1 elements in the pressure level index.
   ; htop, hbot  scalar integers specifying whether the upper and lower
   ;             functions are trapezoids or wedges
   ; ak          [n,n] array containing the averaging kernel matrix
+  ; ak_nfunc    Scalar integer specifying the number of aks above surf_pres
+  ; ak_peff     Effective pressure values of coarse ak layers, read from 
+  ;             L2 file and calculated as the log-pressure value between
+  ; 				 two pressure levels
   ;---------------------------------------------------------------
 
 
@@ -48,6 +55,10 @@ pro read_raw_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ncdf_varget, fid, varid, ret_pres
   ; Pa to hPa
   ret_pres = ret_pres / 100.0
+
+  varid = ncdf_varid(fid, 'air_pres_lay_nsurf')
+  ncdf_varget, fid, varid, pres_nsurf
+  pres_nsurf = pres_nsurf[ifoot,iscan]
 
   groupids = ncdf_groupsinq(fid)
   for i=0, n_elements(groupids)-1 do begin
@@ -74,16 +85,24 @@ pro read_raw_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
 
   ak = ak_full[*,*,ifoot,iscan]
 
+  varid = ncdf_varid(ak_grpid, mol_name + '_func_last_indx')
+  ncdf_varget, ak_grpid, varid, ak_nfunc
+  ak_nfunc = ak_nfunc[ifoot,iscan]
+
+  varid = ncdf_varid(ak_grpid, mol_name + '_func_pres')
+  ncdf_varget, ak_grpid, varid, ak_peff
+  ; Pa to hPa
+  ak_peff = ak_peff/100.0
 end
 
 
 
-pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
+pro return_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
                           Fmatrix, Finv, AKcoarse, Pcoarse, $
                           AKfine, Pfine, Skernel
 
   ;-------------------------------------------------
-  ; read_climcaps_akdata:
+  ; return_climcaps_akdata:
   ;
   ; procedure to read the required data from a CLIMCAPS netCDF file,
   ; and compute the F matrix (trapezoid functions) or the averaging
@@ -122,13 +141,14 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
 
   ; call helper to get the various CLIMCAPS data, and apply
   ; surface correction
-  read_raw_climcaps_akdata, $
+  read_climcaps_akdata, $
      ncfile, ifoot, iscan, mol_name, $
-     ret_pres, surf_pres, ak_pidx, htop, hbot, ak
+     ret_pres, surf_pres, pres_nsurf, ak_pidx, htop, hbot, ak, $
+	  ak_nfunc, ak_peff
 
   ; call helper to do all the AK calculations.
-  calc_climcaps_akdata, ret_pres, surf_pres, ak_pidx, htop, hbot, ak, $
+  calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
+								htop, hbot, ak, ak_nfunc, ak_peff, $
                         Fmatrix, Finv, AKcoarse, Pcoarse, $
                         AKfine, Pfine, Skernel, /adjust_surface
-
 end

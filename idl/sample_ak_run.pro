@@ -6,22 +6,23 @@ pro sample_ak_run
 ;
 
 ; create AKs for each of the molecules and air temp.
-molnames = ['air_temp', 'h2o_vap', 'o3', 'co', 'co2', 'ch4']
+;molnames = ['air_temp', 'h2o_vap', 'o3', 'co', 'co2', 'ch4']
+molnames = ['co2']
 
 ; for each of these two files, there is a hand-picked FOR.
 ; these two files should be downloaded with the data_download.sh file
 ; at the top level.
 
 ncfiles = [ $
-          '../SNDR.J1.CRIMSS.20190901T0336.m06.g037.L2_CLIMCAPS_RET.std.v02_28.G.200214174949.nc', $
-          '../SNDR.J1.CRIMSS.20190901T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.200214190447.nc' ]
-ifoot = [ 4, 15]
-iscan = [32, 20]
+          '../test_data/SNDR.J1.CRIMSS.20190901T0336.m06.g037.L2_CLIMCAPS_RET.std.v02_28.G.200214174949.nc', $
+          '../test_data/SNDR.J1.CRIMSS.20190901T2248.m06.g229.L2_CLIMCAPS_RET.std.v02_28.G.200214190447.nc' ]
+ifoot = [3, 4]
+iscan = [14, 32]
 
 for m=0, n_elements(molnames)-1 do begin
    for i=0, n_elements(ncfiles)-1 do begin
 
-      read_climcaps_akdata, $
+      return_climcaps_akdata, $
          ncfiles[i], ifoot[i], iscan[i], molnames[m], $
          Fmatrix, Finv, AKcoarse, Pcoarse, AKfine, Pfine, Skernel
 
