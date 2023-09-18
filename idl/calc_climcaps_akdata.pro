@@ -19,7 +19,7 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ;  Name              Description
   ; ---------    -----------------------------
   ; ret_pres     the 100 element vertical pressure grid. [hPa]
-  ;              The variable name in the CLIMCAPS L2 product is '/air_pres'
+  ;              The variable name in the CLIMCAPS L2 product is 'air_pres'
   ;              but should be converted from Pa to hPa.
   ; surf_pres    Scalar, surface pressure [hPa]
   ;              '/aux/prior_surf_pres' in L2 product, converted to hPa
@@ -68,8 +68,10 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ; -------------------------
   ; STEP 1: adjust surface
   ; -------------------------
-  ; ak_nlev_scene    number of coarse levels at scene psurf
-  ; ak_pidx_scene    coarse level boundaries at scene psurf
+  ; Prepare arrays before computing the F matrices.
+  ; this will remove coarse layer(s) that are fully below the surface.
+  ; The mid-layer pressure of the nearest-surface coarse layer is also adjusted,
+  ; as well as the number of pressure levels in the fine grid.
 
   if keyword_set(adjust_surface) then begin
      ret_nlev = pres_nsurf
@@ -96,6 +98,9 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
      Pcoarse[ak_nlev-1] = bot_pdiff/alog(ret_pres[bot_pidx-1]/ret_pres[top_pidx-1])
 
   endif else begin
+     ; since no surface adjustment is made, use the full set of trapezoids.
+     ak_nlev = n_elements(ak_pidx) - 1
+     ret_nlev = n_elements(ret_pres)
      AKcoarse = ak
   endelse
 

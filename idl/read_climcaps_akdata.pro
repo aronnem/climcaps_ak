@@ -27,21 +27,28 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ;  Name              Description
   ; ---------   -----------------------------
   ; ret_pres    pressure levels in RT grid (100 elements), units hPa
-  ; surf_pres   scalar surface pressure at requested footprint
+  ;             'air_pres' in CLIMCAPS L2 product, converted to hPa
+  ; surf_pres   scalar surface pressure at requested footprint, units hPa
+  ;             '/aux/prior_surf_pres' in L2 product, converted to hPa
   ; pres_nsurf  Scalar index specifying which element of ret_pres
   ;             is closest to surf_pres
+  ;             'air_pres_lay_nsurf' in L2 product
   ; ak_pidx     integer index array of pressure level boundaries for the
   ;             trapezoid functions. For n coarse layers,
   ;             there will be n+1 elements in the pressure level index.
+  ;             'ave_kern/<mol_name>_func_indxs' from the L2 product
   ; htop, hbot  scalar integers specifying whether the upper and lower
   ;             functions are trapezoids or wedges
+  ;             'ave_kern/<mol_name>_func_htop' and 'hbot' from L2 product
   ; ak          [n,n] array containing the averaging kernel matrix
+  ;             'ave_kern/<mol_name>_ave_kern' in L2 product
   ; ak_nfunc    Scalar integer specifying the number of aks above surf_pres
+  ;             'ave_kern/<mol_name>_func_last_indx' in L2 product
   ; ak_peff     Effective pressure values of coarse ak layers, read from 
   ;             L2 file and calculated as the log-pressure value between
   ;             two pressure levels
+  ;             'ave_kern/<mol_name>_func_pres' in L2 product
   ;---------------------------------------------------------------
-
 
   ;--------
   ; STEP 1
@@ -70,7 +77,7 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   varid = ncdf_varid(aux_grpid, 'prior_surf_pres')
   ncdf_varget, aux_grpid, varid, surf_pres_all
   ; Pa to hPa conversion
-  surf_pres = surf_pres_all[ifoot, iscan]/100
+  surf_pres = surf_pres_all[ifoot, iscan]/100.0
 
   varid = ncdf_varid(ak_grpid, mol_name + '_func_htop')
   ncdf_varget, ak_grpid, varid, htop
@@ -106,7 +113,10 @@ pro return_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ;
   ; procedure to read the required data from a CLIMCAPS netCDF file,
   ; and compute the F matrix (trapezoid functions) or the averaging
-  ; kernels on coarse or fine pressure levels.
+  ; kernels on coarse or fine pressure levels. The lower altitude
+  ; (higher pressure) trapezoids are adjusted according to the surface
+  ; pressure. This may involve removing one or more trapezoids if the
+  ; surface pressure is low enough.
   ;
   ; INPUT:
   ;  Name              Description
