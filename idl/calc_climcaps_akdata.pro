@@ -64,7 +64,6 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ; Skernel     Smoothing kernels, an (L, L) shaped matrix
   ;             (FF+ in Maddy&Barnet 2008)
   ;---------------------------------------------------------------
-help, ak
 
   ; -------------------------
   ; STEP 1: adjust surface
