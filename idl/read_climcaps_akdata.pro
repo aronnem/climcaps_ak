@@ -1,7 +1,7 @@
 pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
-                         ret_pres, surf_pres, pres_nsurf, ak_pidx, $
-								 htop, hbot, ak, ak_nfunc, ak_peff, $
-                         adjust_surface=adjust_surface
+                          ret_pres, surf_pres, pres_nsurf, ak_pidx, $
+                          htop, hbot, ak, ak_nfunc, ak_peff, $
+                          adjust_surface=adjust_surface
   ;-------------------------------------------------
   ; read_climcaps_akdata:
   ;
@@ -29,7 +29,7 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ; ret_pres    pressure levels in RT grid (100 elements), units hPa
   ; surf_pres   scalar surface pressure at requested footprint
   ; pres_nsurf  Scalar index specifying which element of ret_pres
-  ; 				 is closest to surf_pres
+  ;             is closest to surf_pres
   ; ak_pidx     integer index array of pressure level boundaries for the
   ;             trapezoid functions. For n coarse layers,
   ;             there will be n+1 elements in the pressure level index.
@@ -39,7 +39,7 @@ pro read_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   ; ak_nfunc    Scalar integer specifying the number of aks above surf_pres
   ; ak_peff     Effective pressure values of coarse ak layers, read from 
   ;             L2 file and calculated as the log-pressure value between
-  ; 				 two pressure levels
+  ;             two pressure levels
   ;---------------------------------------------------------------
 
 
@@ -98,8 +98,8 @@ end
 
 
 pro return_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
-                          Fmatrix, Finv, AKcoarse, Pcoarse, $
-                          AKfine, Pfine, Skernel
+                            Fmatrix, Finv, AKcoarse, Pcoarse, $
+                            AKfine, Pfine, Skernel
 
   ;-------------------------------------------------
   ; return_climcaps_akdata:
@@ -144,11 +144,11 @@ pro return_climcaps_akdata, ncfile, ifoot, iscan, mol_name, $
   read_climcaps_akdata, $
      ncfile, ifoot, iscan, mol_name, $
      ret_pres, surf_pres, pres_nsurf, ak_pidx, htop, hbot, ak, $
-	  ak_nfunc, ak_peff
+     ak_nfunc, ak_peff
 
   ; call helper to do all the AK calculations.
   calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
-								htop, hbot, ak, ak_nfunc, ak_peff, $
+                        htop, hbot, ak, ak_nfunc, ak_peff, $
                         Fmatrix, Finv, AKcoarse, Pcoarse, $
                         AKfine, Pfine, Skernel, /adjust_surface
 end

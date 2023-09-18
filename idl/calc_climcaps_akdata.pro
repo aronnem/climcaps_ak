@@ -25,7 +25,7 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ;              '/aux/prior_surf_pres' in L2 product, converted to hPa
   ; pres_nsurf   Scalar index specifying which element of ret_pres
   ;              is closest to surf_pres
-  ; 				  'air_pres_lay_nsurf' in L2 product
+  ;              'air_pres_lay_nsurf' in L2 product
   ; ak_pidx      The indices into the pressure grid for the trapezoid functions
   ;              'ave_kern/<mol_name>_func_indxs' in L2 product
   ; htop         Scalar integer specifying shape of TOA trapezoid function
@@ -35,10 +35,10 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ; ak           Averaging kernel matrix for coarse trapezoid functions
   ;              'ave_kern/<mol_name>_ave_kern' in L2 product
   ; ak_nfunc     Scalar integer specifying the number of aks above surf_pres
-  ; 				  'ave_kern/<mol_name>_func_last_indx' in L2 product
+  ;              'ave_kern/<mol_name>_func_last_indx' in L2 product
   ; ak_peff      Pressure value of coarse trapezoid layer, calculated as the log-average
-  ; 				  pressure between two pressure levels
-  ; 				  'ave_kern/<mol_name>_func_pres' in L2 product
+  ;              pressure between two pressure levels
+  ;              'ave_kern/<mol_name>_func_pres' in L2 product
   ; adjust_surface optional keyword specifying whether to apply
   ;                the surface adjustment. This is mainly for testing,
   ;                in most cases this should be enabled to adjust the
@@ -76,8 +76,8 @@ help, ak
      ret_nlev = pres_nsurf
      ak_nlev = ak_nfunc
 
-     ; note: AK and ak_pidx will be truncated if 
-	  ; ak_nfunc < n_elements(diag_matrix(ak))
+     ; note: AK and ak_pidx will be truncated if
+     ; ak_nfunc < n_elements(diag_matrix(ak))
      ; This happens if the surface is above one entire coarse layer.
      AKcoarse = ak[0:ak_nlev-1,0:ak_nlev-1]
 
@@ -85,12 +85,12 @@ help, ak
      ; the boundaries of the coarse AK layers (aka trapezoids). 
      ; This means that n_elements(ak_pidx) = ak_nlev + 1
      ak_pidx = ak_pidx[0:ak_nlev]
-	  ; Replace the bottom index of the trapezoid to surf_pres
-	  ; with pres_nsurf
+     ; Replace the bottom index of the trapezoid to surf_pres
+     ; with pres_nsurf
      ak_pidx[ak_nlev] = pres_nsurf
  
      ; Adjust bottom coarse AK pressure layer to surf_pres
-	  Pcoarse = ak_peff[0:ak_nlev-1]
+     Pcoarse = ak_peff[0:ak_nlev-1]
      bot_pidx = ak_pidx[ak_nlev]
      top_pidx = ak_pidx[ak_nlev-1]
      bot_pdiff = ret_pres[bot_pidx-1] - ret_pres[top_pidx-1]
