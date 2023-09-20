@@ -3,5 +3,4 @@
 .compile plot_ak
 .compile sample_ak_run
 
-sample_ak_run
-
+sample_ak_run, /test_h5_output
