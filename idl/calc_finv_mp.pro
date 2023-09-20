@@ -65,7 +65,11 @@ PRO calc_finv_mp, num_func, func_indx, ret_nlev, htop, hbot, air_pres, $
   fftr = MATRIX_MULTIPLY(DOUBLE(f_matrix),DOUBLE(f_matrix),/ATRANSPOSE) ; [nj x nj]
   status=1L
   finv1 = LA_INVERT(fftr,STATUS=status,/double)
-  print,status ; status should be zero to indicate successful inversion
+  ; status should be zero to indicate successful inversion
+  ; for now, make this an informational warning instead of an error
+  if status NE 0 then begin
+     message, 'in calc_finv_mp, LA_INVERT failed, due to singular matrix', /informational
+  end
   f_inv = MATRIX_MULTIPLY(finv1,DOUBLE(f_matrix),/BTRANSPOSE)  ; [nj x nL]
  
 END 
