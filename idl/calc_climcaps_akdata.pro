@@ -75,7 +75,6 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
 
   if keyword_set(adjust_surface) then begin
      ret_nlev = pres_nsurf
-     ak_nlev = ak_nfunc
 
      ; note: AK and ak_pidx will be truncated if
      ; ak_nfunc < n_elements(diag_matrix(ak))
