@@ -80,26 +80,26 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
      ; note: AK and ak_pidx will be truncated if
      ; ak_nfunc < n_elements(diag_matrix(ak))
      ; This happens if the surface is above one entire coarse layer.
-     AKcoarse = ak[0:ak_nlev-1,0:ak_nlev-1]
+     AKcoarse = ak[0:ak_nfunc-1,0:ak_nfunc-1]
 
      ; note: ak_pidx contain the pressure level indices that form
      ; the boundaries of the coarse AK layers (aka trapezoids). 
-     ; This means that n_elements(ak_pidx) = ak_nlev + 1
-     ak_pidx = ak_pidx[0:ak_nlev]
+     ; This means that n_elements(ak_pidx) = ak_nfunc + 1
+     ak_pidx = ak_pidx[0:ak_nfunc]
      ; Replace the bottom index of the trapezoid to surf_pres
      ; with pres_nsurf
-     ak_pidx[ak_nlev] = pres_nsurf
+     ak_pidx[ak_nfunc] = pres_nsurf
  
      ; Adjust bottom coarse AK pressure layer to surf_pres
-     Pcoarse = ak_peff[0:ak_nlev-1]
-     bot_pidx = ak_pidx[ak_nlev]
-     top_pidx = ak_pidx[ak_nlev-1]
+     Pcoarse = ak_peff[0:ak_nfunc-1]
+     bot_pidx = ak_pidx[ak_nfunc]
+     top_pidx = ak_pidx[ak_nfunc-1]
      bot_pdiff = ret_pres[bot_pidx-1] - ret_pres[top_pidx-1]
-     Pcoarse[ak_nlev-1] = bot_pdiff/alog(ret_pres[bot_pidx-1]/ret_pres[top_pidx-1])
+     Pcoarse[ak_nfunc-1] = bot_pdiff/alog(ret_pres[bot_pidx-1]/ret_pres[top_pidx-1])
 
   endif else begin
      ; since no surface adjustment is made, use the full set of trapezoids.
-     ak_nlev = n_elements(ak_pidx) - 1
+     ak_nfunc = n_elements(ak_pidx) - 1
      ret_nlev = n_elements(ret_pres)
      AKcoarse = ak
   endelse
@@ -107,7 +107,7 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ; -------------------------
   ; STEP 2: call helper to compute Func matrix and inverse (F and F+)
   ; -------------------------
-  calc_finv_mp, ak_nlev, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
+  calc_finv_mp, ak_nfunc, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
                 Fmatrix, Finv
 
   s = size(Fmatrix, /dimensions)
