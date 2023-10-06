@@ -59,16 +59,7 @@ pro test_ak_run_output, h5_output_file, Fmatrix, Finv, AKcoarse, Pcoarse, AKfine
 
 end
 
-pro sample_ak_run, write_h5_output=write_h5_output, test_h5_output=test_h5_output
-
-;
-; batch run, over all profile: air temp, and five molecules.
-; skipping hno3 since that does not have valid data in both sample obs.
-;
-
-; create AKs for each of the molecules and air temp.
-;molnames = ['air_temp', 'h2o_vap', 'o3', 'co', 'co2', 'ch4']
-molnames = ['co2']
+pro sample_ak_run, molnames, write_h5_output=write_h5_output, test_h5_output=test_h5_output
 
 ; for each of these two files, there is a hand-picked FOR.
 ; these two files should be downloaded with the data_download.sh file
@@ -102,11 +93,13 @@ for m=0, n_elements(molnames)-1 do begin
 
       h5_output_file = string(i+1, molnames[m], format='("../test_data/test_case_",(1I1),"_",(A),".h5")')
       if keyword_set(write_h5_output) then begin
+         print, 'writing output file: ', h5_output_file
          write_ak_run_output, $
             h5_output_file, $
             Fmatrix, Finv, AKcoarse, Pcoarse, AKfine, Pfine, Skernel
       endif
       if keyword_set(test_h5_output) then begin
+         print, 'testing output relative to: ', h5_output_file
          test_ak_run_output, $
             h5_output_file, $
             Fmatrix, Finv, AKcoarse, Pcoarse, AKfine, Pfine, Skernel
