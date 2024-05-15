@@ -3,3 +3,5 @@
 *.csv
 *.png
 *.jpg
+.DS_Store
+*.h5

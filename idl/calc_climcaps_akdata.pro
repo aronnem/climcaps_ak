@@ -19,13 +19,13 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ;  Name              Description
   ; ---------    -----------------------------
   ; ret_pres     the 100 element vertical pressure grid. [hPa]
-  ;              The variable name in the CLIMCAPS L2 product is '/air_pres'
+  ;              The variable name in the CLIMCAPS L2 product is 'air_pres'
   ;              but should be converted from Pa to hPa.
   ; surf_pres    Scalar, surface pressure [hPa]
   ;              '/aux/prior_surf_pres' in L2 product, converted to hPa
   ; pres_nsurf   Scalar index specifying which element of ret_pres
   ;              is closest to surf_pres
-  ; 				  'air_pres_lay_nsurf' in L2 product
+  ;              'air_pres_lay_nsurf' in L2 product
   ; ak_pidx      The indices into the pressure grid for the trapezoid functions
   ;              'ave_kern/<mol_name>_func_indxs' in L2 product
   ; htop         Scalar integer specifying shape of TOA trapezoid function
@@ -35,10 +35,10 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ; ak           Averaging kernel matrix for coarse trapezoid functions
   ;              'ave_kern/<mol_name>_ave_kern' in L2 product
   ; ak_nfunc     Scalar integer specifying the number of aks above surf_pres
-  ; 				  'ave_kern/<mol_name>_func_last_indx' in L2 product
+  ;              'ave_kern/<mol_name>_func_last_indx' in L2 product
   ; ak_peff      Pressure value of coarse trapezoid layer, calculated as the log-average
-  ; 				  pressure between two pressure levels
-  ; 				  'ave_kern/<mol_name>_func_pres' in L2 product
+  ;              pressure between two pressure levels
+  ;              'ave_kern/<mol_name>_func_pres' in L2 product
   ; adjust_surface optional keyword specifying whether to apply
   ;                the surface adjustment. This is mainly for testing,
   ;                in most cases this should be enabled to adjust the
@@ -64,46 +64,49 @@ pro calc_climcaps_akdata, ret_pres, surf_pres, pres_nsurf, ak_pidx, $
   ; Skernel     Smoothing kernels, an (L, L) shaped matrix
   ;             (FF+ in Maddy&Barnet 2008)
   ;---------------------------------------------------------------
-help, ak
 
   ; -------------------------
   ; STEP 1: adjust surface
   ; -------------------------
-  ; ak_nlev_scene    number of coarse levels at scene psurf
-  ; ak_pidx_scene    coarse level boundaries at scene psurf
+  ; Prepare arrays before computing the F matrices.
+  ; this will remove coarse layer(s) that are fully below the surface.
+  ; The mid-layer pressure of the nearest-surface coarse layer is also adjusted,
+  ; as well as the number of pressure levels in the fine grid.
 
   if keyword_set(adjust_surface) then begin
      ret_nlev = pres_nsurf
-     ak_nlev = ak_nfunc
 
-     ; note: AK and ak_pidx will be truncated if 
-	  ; ak_nfunc < n_elements(diag_matrix(ak))
+     ; note: AK and ak_pidx will be truncated if
+     ; ak_nfunc < n_elements(diag_matrix(ak))
      ; This happens if the surface is above one entire coarse layer.
-     AKcoarse = ak[0:ak_nlev-1,0:ak_nlev-1]
+     AKcoarse = ak[0:ak_nfunc-1,0:ak_nfunc-1]
 
      ; note: ak_pidx contain the pressure level indices that form
      ; the boundaries of the coarse AK layers (aka trapezoids). 
-     ; This means that n_elements(ak_pidx) = ak_nlev + 1
-     ak_pidx = ak_pidx[0:ak_nlev]
-	  ; Replace the bottom index of the trapezoid to surf_pres
-	  ; with pres_nsurf
-     ak_pidx[ak_nlev] = pres_nsurf
+     ; This means that n_elements(ak_pidx) = ak_nfunc + 1
+     ak_pidx = ak_pidx[0:ak_nfunc]
+     ; Replace the bottom index of the trapezoid to surf_pres
+     ; with pres_nsurf
+     ak_pidx[ak_nfunc] = pres_nsurf
  
      ; Adjust bottom coarse AK pressure layer to surf_pres
-	  Pcoarse = ak_peff[0:ak_nlev-1]
-     bot_pidx = ak_pidx[ak_nlev]
-     top_pidx = ak_pidx[ak_nlev-1]
+     Pcoarse = ak_peff[0:ak_nfunc-1]
+     bot_pidx = ak_pidx[ak_nfunc]
+     top_pidx = ak_pidx[ak_nfunc-1]
      bot_pdiff = ret_pres[bot_pidx-1] - ret_pres[top_pidx-1]
-     Pcoarse[ak_nlev-1] = bot_pdiff/alog(ret_pres[bot_pidx-1]/ret_pres[top_pidx-1])
+     Pcoarse[ak_nfunc-1] = bot_pdiff/alog(ret_pres[bot_pidx-1]/ret_pres[top_pidx-1])
 
   endif else begin
+     ; since no surface adjustment is made, use the full set of trapezoids.
+     ak_nfunc = n_elements(ak_pidx) - 1
+     ret_nlev = n_elements(ret_pres)
      AKcoarse = ak
   endelse
 
   ; -------------------------
   ; STEP 2: call helper to compute Func matrix and inverse (F and F+)
   ; -------------------------
-  calc_finv_mp, ak_nlev, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
+  calc_finv_mp, ak_nfunc, ak_pidx, ret_nlev, htop, hbot, ret_pres, $
                 Fmatrix, Finv
 
   s = size(Fmatrix, /dimensions)
